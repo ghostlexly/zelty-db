@@ -6,6 +6,7 @@ import { SharedModule } from '../shared/shared.module';
 import { CqrsModule } from '@nestjs/cqrs';
 import { BasicCommandRunner } from './commands/basic.command';
 import { SyncRestaurantsCommandRunner } from './commands/sync-restaurants.command';
+import { ZeltyModule } from '../zelty/zelty.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SyncRestaurantsCommandRunner } from './commands/sync-restaurants.comman
     CqrsModule.forRoot(),
 
     SharedModule,
+    ZeltyModule,
   ],
   providers: [
     // Commands
