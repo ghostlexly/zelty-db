@@ -17,9 +17,6 @@ export class BasicCommand extends CommandRunner {
   async run(passedParams: string[]) {
     const [name] = passedParams;
 
-    // Test the database connection from the CLI commands, will throw an error if the connection is not established
-    await this.db.prisma.account.findMany();
-
     this.logger.debug(`Hello, ${name}!`);
   }
 }

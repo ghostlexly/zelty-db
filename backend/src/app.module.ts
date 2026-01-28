@@ -9,7 +9,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UnhandledExceptionsFilter } from './modules/core/filters/unhandled-exceptions.filter';
 import { JwtAuthGuard } from './modules/core/guards/jwt-auth.guard';
-import { RolesGuard } from './modules/core/guards/roles.guard';
 import { ThrottlerBehindProxyGuard } from './modules/core/guards/throttler-behind-proxy.guard';
 import { TrimStringsPipe } from './modules/core/pipes/trim-strings.pipe';
 import { SharedModule } from './modules/shared/shared.module';
@@ -60,10 +59,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
     },
     {
       provide: APP_GUARD,
