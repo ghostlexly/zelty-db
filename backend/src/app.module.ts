@@ -15,6 +15,7 @@ import { SharedModule } from './modules/shared/shared.module';
 import { CqrsModule } from '@nestjs/cqrs';
 import { LoggerModule } from './modules/core/logger/logger.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ZeltyModule } from './modules/zelty/zelty.module';
 
 @Global()
 @Module({
@@ -50,6 +51,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 
     // -- Business Modules
     SharedModule,
+
+    ZeltyModule,
   ],
   controllers: [AppController],
   providers: [

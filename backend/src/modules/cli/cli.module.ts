@@ -4,7 +4,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { BullModule } from '@nestjs/bullmq';
 import { SharedModule } from '../shared/shared.module';
 import { CqrsModule } from '@nestjs/cqrs';
-import { BasicCommand } from './commands/basic.command';
+import { BasicCommandRunner } from './commands/basic.command';
+import { SyncRestaurantsCommandRunner } from './commands/sync-restaurants.command';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { BasicCommand } from './commands/basic.command';
   ],
   providers: [
     // Commands
-    BasicCommand,
+    BasicCommandRunner,
+    SyncRestaurantsCommandRunner,
 
     // Seeders
   ],

@@ -12,10 +12,80 @@ datasource db {
   provider = "postgresql"
 }
 
-model WebhookEvent {
-  id        String   @id @default(uuid())
-  eventId   String
-  raw       Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model ZeltyRestaurant {
+  id                   String   @id @default(uuid())
+  zeltyId              Int      @unique
+  remoteId             String?
+  disable              Boolean  @default(false)
+  name                 String
+  description          String?
+  countryCode          String   @default("FR")
+  currency             String   @default("EUR")
+  image                String?
+  defaultLang          String   @default("fr")
+  productionDelay      Int      @default(0)
+  deliveryTime         Int      @default(0)
+  orderingAvailable    Boolean  @default(true)
+  deliveryCharge       Decimal  @default(0) @db.Decimal(10, 2)
+  deliveryChargeTva    Decimal  @default(0) @db.Decimal(5, 2)
+  deliveryMinimum      Decimal  @default(0) @db.Decimal(10, 2)
+  deliveryNoChargeMin  Decimal  @default(0) @db.Decimal(10, 2)
+  deliveryHours        Json?
+  openingHours         Json?
+  openingHoursTxt      String?
+  happyHours           Json?
+  closures             Json     @default("[]")
+  address              String?
+  phone                String?
+  publicName           String?
+  onlineOrderingHidden Boolean  @default(false)
+  latitude             Decimal? @db.Decimal(10, 7)
+  longitude            Decimal? @db.Decimal(10, 7)
+  takeawayDelay        Int      @default(0)
+  orderingDelay        Boolean  @default(false)
+  delay                Int      @default(0)
+  meta                 Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  orders ZeltyOrder[]
+}
+
+model ZeltyOrder {
+  id                String    @id @default(uuid())
+  zeltyId           Int       @unique
+  zeltyUuid         String    @unique
+  comment           String?
+  deviceId          Int?
+  closedByDeviceId  Int?
+  remoteId          String?
+  ref               String?
+  loyalty           Int       @default(0)
+  seats             Int       @default(1)
+  tableNumber       Int?
+  zeltyRestaurantId Int
+  zeltyCreatedAt    DateTime
+  closedAt          DateTime?
+  dueDate           DateTime?
+  mode              String?
+  fulfillmentType   String?
+  source            String?
+  originName        String?
+  status            String
+  amountIncTax      Int       @default(0)
+  amountExcTax      Int       @default(0)
+  virtualBrandName  String?
+  firstName         String?
+  phone             String?
+  buzzerRef         String?
+  displayId         String?
+  channel           String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  restaurant ZeltyRestaurant @relation(fields: [zeltyRestaurantId], references: [zeltyId])
+
+  @@index([zeltyRestaurantId])
+  @@index([status])
+  @@index([zeltyCreatedAt])
 }
