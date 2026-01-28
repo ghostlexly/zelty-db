@@ -19,6 +19,6 @@ export class SyncRestaurantsCommandRunner extends CommandRunner {
 
     await this.commandBus.execute(new SyncRestaurantsCommand());
 
-    this.logger.debug('Executed');
+    this.logger.debug('Command executed successfully.');
   }
 }
