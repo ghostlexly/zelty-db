@@ -1,0 +1,164 @@
+name: Docker Images Deploy
+
+on:
+  push:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: cd backend && npm ci
+
+      - name: Generate prisma client
+        run: cd backend && npx prisma generate
+
+      - name: Run type-checks
+        run: cd backend && npm run type-check
+
+      - name: Run unit tests
+        run: cd backend && npm run test
+
+  build:
+    runs-on: ubuntu-24.04
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create environment file(s)
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Login to docker registry
+        uses: docker/login-action@v2
+        with:
+          username: lunisoft
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: backend
+
+      - name: Run unit tests
+        run: npm run test
+        working-directory: backend
+
+      - name: Build and push docker images
+        run: |
+          NODE_ENV=production docker compose build
+          docker compose push
+
+      - name: Transfer files to production server
+        uses: appleboy/scp-action@master
+        with:
+          host: 37.59.109.9
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "compose.yml,.env"
+          target: "~/zelty-db"
+
+      - name: Deploy on production server
+        uses: appleboy/ssh-action@master
+        with:
+          host: 37.59.109.9
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Go to docker directory
+            cd ~/zelty-db
+
+            # Login to docker registry
+            sudo docker login -u lunisoft -p ${{ secrets.DOCKER_PASSWORD }}
+
+            # Pull new images
+            sudo docker compose pull
+
+            # Backup postgres database before stopping containers
+            mkdir -p ~/zelty-db/auto-backups
+            if sudo docker compose ps postgres | grep -q "Up"; then
+              sudo docker compose exec postgres pg_dump -U lunisoft dispomenage > ~/zelty-db/auto-backups/backup-$(date +%Y-%m-%d--%H-%M).sql
+            else
+              echo "PostgreSQL not running, skipping backup"
+            fi
+
+            # Stop and remove existing containers
+            sudo docker compose down
+
+            # Start new containers
+            sudo docker compose up -d
+
+            # Wait for PostgreSQL server readiness with timeout
+            echo "Waiting for PostgreSQL server readiness..."
+            ATTEMPTS=0
+            until sudo docker compose exec postgres pg_isready -h localhost -U lunisoft -d dispomenage; do
+              ATTEMPTS=$((ATTEMPTS+1))
+              if [ "$ATTEMPTS" -ge 60 ]; then
+                echo "PostgreSQL did not become ready in time" >&2
+                exit 1
+              fi
+              echo "PostgreSQL not ready yet ($ATTEMPTS) - waiting..."
+              sleep 2
+            done
+            echo "PostgreSQL is ready!"
+
+      - name: Run migrations on production server
+        uses: appleboy/ssh-action@master
+        with:
+          host: 37.59.109.9
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Go to docker directory
+            cd ~/zelty-db
+
+            # Run migrations
+            sudo docker compose exec backend npx prisma migrate deploy
+
+      - name: Run sentry sourcemaps on production server
+        uses: appleboy/ssh-action@master
+        with:
+          host: 37.59.109.9
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Go to backend directory
+            cd ~/zelty-db
+
+            # Run sentry sourcemaps
+            sudo docker compose exec backend npm run sentry:sourcemaps
+
+      - name: Prune untagged docker images
+        uses: appleboy/ssh-action@master
+        with:
+          host: 37.59.109.9
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Go to docker directory
+            cd ~/zelty-db
+
+            # Prune untagged images
+            sudo docker image prune -f

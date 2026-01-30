@@ -56,6 +56,6 @@ caddy:80, localhost:80, localhost:443 {
 }
 
 # Production
-dispomenage.fr, www.dispomenage.fr {
+restaurant-tonin.fr, www.restaurant-tonin.fr {
     import common
 }

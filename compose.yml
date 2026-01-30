@@ -1,7 +1,7 @@
 services:
   # ===================================================================================================================================================================================
   backend:
-    image: lunisoft/terracapital:backend
+    image: lunisoft/zelty-db:backend
     build:
       context: ./backend
     environment:
@@ -23,18 +23,9 @@ services:
     restart: unless-stopped
   # ===================================================================================================================================================================================
   caddy:
-    image: lunisoft/terracapital:caddy
+    image: lunisoft/zelty-db:caddy
     build:
       context: ./caddy
-    ports:
-      - mode: host
-        protocol: tcp
-        published: 80
-        target: 80
-      - mode: host
-        protocol: tcp
-        published: 443
-        target: 443
     volumes:
       - ./caddy/logs:/var/log/caddy:z
       - caddy_data:/data
