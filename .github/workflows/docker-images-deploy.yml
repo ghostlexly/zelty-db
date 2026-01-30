@@ -137,19 +137,6 @@ jobs:
             # Run migrations
             sudo docker compose exec backend npx prisma migrate deploy
 
-      - name: Run sentry sourcemaps on production server
-        uses: appleboy/ssh-action@master
-        with:
-          host: 37.59.109.9
-          username: ubuntu
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Go to backend directory
-            cd ~/zelty-db
-
-            # Run sentry sourcemaps
-            sudo docker compose exec backend npm run sentry:sourcemaps
-
       - name: Prune untagged docker images
         uses: appleboy/ssh-action@master
         with:
