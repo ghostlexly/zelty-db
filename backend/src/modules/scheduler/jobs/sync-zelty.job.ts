@@ -1,19 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { SyncRestaurantsCommand } from '../../zelty/commands/sync-restaurants/sync-restaurants.command';
+import { SyncRestaurantsHandler } from '../../zelty/commands/sync-restaurants/sync-restaurants.handler';
+import { SyncOrdersHandler } from '../../zelty/commands/sync-orders/sync-orders.handler';
 
 @Injectable()
 export class SyncZeltyJob {
   private readonly logger = new Logger(SyncZeltyJob.name);
 
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly syncRestaurantsHandler: SyncRestaurantsHandler,
+    private readonly syncOrdersHandler: SyncOrdersHandler,
+  ) {}
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async execute() {
     this.logger.log('[Scheduler]: Running scheduled sync zelty...');
 
-    await this.commandBus.execute(new SyncRestaurantsCommand());
+    await this.syncRestaurantsHandler.execute();
+    await this.syncOrdersHandler.execute();
 
     this.logger.log('[Scheduler]: Scheduled sync zelty completed.');
   }

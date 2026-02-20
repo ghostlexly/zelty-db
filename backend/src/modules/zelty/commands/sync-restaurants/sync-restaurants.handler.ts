@@ -1,14 +1,10 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { SyncRestaurantsCommand } from './sync-restaurants.command';
 import { ZeltyService } from '../../zelty.service';
 import { AxiosError, AxiosInstance } from 'axios';
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from '../../../shared/services/database.service';
 
-@CommandHandler(SyncRestaurantsCommand)
-export class SyncRestaurantsHandler
-  implements ICommandHandler<SyncRestaurantsCommand>
-{
+@Injectable()
+export class SyncRestaurantsHandler {
   private logger = new Logger(SyncRestaurantsHandler.name);
   private readonly client: AxiosInstance;
 

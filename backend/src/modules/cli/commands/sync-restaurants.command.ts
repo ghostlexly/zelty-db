@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { Command, CommandRunner } from 'nest-commander';
-import { CommandBus } from '@nestjs/cqrs';
-import { SyncRestaurantsCommand } from '../../zelty/commands/sync-restaurants/sync-restaurants.command';
+import { SyncRestaurantsHandler } from '../../zelty/commands/sync-restaurants/sync-restaurants.handler';
 
 @Command({
   name: 'sync:restaurants',
@@ -10,14 +9,14 @@ import { SyncRestaurantsCommand } from '../../zelty/commands/sync-restaurants/sy
 export class SyncRestaurantsCommandRunner extends CommandRunner {
   private logger = new Logger(SyncRestaurantsCommandRunner.name);
 
-  constructor(private readonly commandBus: CommandBus) {
+  constructor(private readonly syncRestaurantsHandler: SyncRestaurantsHandler) {
     super();
   }
 
   async run() {
     this.logger.debug(`Executing sync:restaurants command...`);
 
-    await this.commandBus.execute(new SyncRestaurantsCommand());
+    await this.syncRestaurantsHandler.execute();
 
     this.logger.debug('Command executed successfully.');
   }
