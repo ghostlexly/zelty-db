@@ -96,6 +96,8 @@ export class SyncOrdersHandler {
         }
 
         offset += PAGE_LIMIT;
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
       this.logger.log(`Successfully synced ${totalSynced} orders`);
