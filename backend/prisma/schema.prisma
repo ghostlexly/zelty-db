@@ -49,6 +49,7 @@ model ZeltyRestaurant {
   updatedAt            DateTime @updatedAt
 
   orders ZeltyOrder[]
+  dishes ZeltyDish[]
 }
 
 model ZeltyOrder {
@@ -84,8 +85,74 @@ model ZeltyOrder {
   updatedAt         DateTime  @updatedAt
 
   restaurant ZeltyRestaurant @relation(fields: [zeltyRestaurantId], references: [zeltyId])
+  items      ZeltyOrderItem[]
 
   @@index([zeltyRestaurantId])
   @@index([status])
   @@index([zeltyCreatedAt])
+}
+
+model ZeltyDish {
+  id                 String   @id @default(uuid())
+  zeltyId            Int      @unique
+  zeltyRestaurantId  Int
+  remoteId           String?
+  sku                String?
+  name               String
+  description        String?
+  image              String?
+  thumb              String?
+  price              Int      @default(0)
+  priceTogo          Int?
+  priceDelivery      Int?
+  happyPrice         Int?
+  costPrice          Int?
+  tax                Int      @default(0)
+  taxTakeaway        Int?
+  taxDelivery        Int?
+  tags               Json     @default("[]")
+  options            Json     @default("[]")
+  fabricationPlaceId Int?
+  color              String?
+  loyaltyPoints      Int      @default(0)
+  earnLoyalty        Int      @default(0)
+  priceToDefine      Boolean  @default(false)
+  disable            Boolean  @default(false)
+  disableTakeaway    Boolean  @default(false)
+  disableDelivery    Boolean  @default(false)
+  meta               Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  restaurant ZeltyRestaurant @relation(fields: [zeltyRestaurantId], references: [zeltyId])
+  orderItems ZeltyOrderItem[]
+
+  @@index([zeltyRestaurantId])
+  @@index([disable])
+}
+
+model ZeltyOrderItem {
+  id                    String  @id @default(uuid())
+  zeltyId               Int     @unique
+  zeltyOrderId          Int
+  zeltyDishId           Int
+  name                  String
+  type                  String
+  course                Int     @default(0)
+  comment               String?
+  baseOriginalAmountIncTax Int  @default(0)
+  originalAmountIncTax  Int     @default(0)
+  discountedAmountIncTax Int    @default(0)
+  finalAmountIncTax     Int     @default(0)
+  taxAmount             Int     @default(0)
+  taxRate               Int?
+  modifiers             Json    @default("[]")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  order ZeltyOrder @relation(fields: [zeltyOrderId], references: [zeltyId])
+  dish  ZeltyDish  @relation(fields: [zeltyDishId], references: [zeltyId])
+
+  @@index([zeltyOrderId])
+  @@index([zeltyDishId])
 }

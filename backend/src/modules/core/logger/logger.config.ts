@@ -32,7 +32,7 @@ export const createWinstonConfig = () => {
       format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.ms(),
-        nestWinstonModuleUtilities.format.nestLike('FodmapFacile', {
+        nestWinstonModuleUtilities.format.nestLike('zelty-db', {
           colors: true,
           prettyPrint: true,
           processId: true,

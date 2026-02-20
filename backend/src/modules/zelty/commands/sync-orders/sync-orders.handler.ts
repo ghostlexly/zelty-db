@@ -37,6 +37,7 @@ export class SyncOrdersHandler {
               offset,
               from: dateUtils.format(fromDate, 'yyyy-MM-dd'),
               to: dateUtils.format(toDate, 'yyyy-MM-dd'),
+              expand: 'items',
             },
           })
           .then((res) => res.data.orders);
@@ -84,6 +85,46 @@ export class SyncOrdersHandler {
             },
             update: orderData,
           });
+
+          if (order.items && Array.isArray(order.items)) {
+            for (const item of order.items) {
+              const itemData = {
+                zeltyOrderId: order.id,
+                zeltyDishId: parseInt(item.item_id as string),
+                name: item.name,
+                type: item.type ?? 'dish',
+                course: item.course ?? 0,
+                comment: item.comment ?? null,
+                baseOriginalAmountIncTax:
+                  item.price?.base_original_amount_inc_tax ?? 0,
+                originalAmountIncTax: item.price?.original_amount_inc_tax ?? 0,
+                discountedAmountIncTax:
+                  item.price?.discounted_amount_inc_tax ?? 0,
+                finalAmountIncTax: item.price?.final_amount_inc_tax ?? 0,
+                taxAmount: item.price?.tax?.tax_amount ?? 0,
+                taxRate: item.price?.tax?.tax_rate ?? null,
+                modifiers: item.modifiers ?? [],
+              };
+
+              await this.db.prisma.zeltyOrderItem
+                .upsert({
+                  where: { zeltyId: item.id },
+                  create: {
+                    zeltyId: item.id,
+                    ...itemData,
+                  },
+                  update: itemData,
+                })
+                .catch((err) => {
+                  this.logger.error(
+                    `Error syncing zeltyOrderItem: ${err.message}`,
+                    {
+                      order_items: order.items,
+                    },
+                  );
+                });
+            }
+          }
         }
 
         totalSynced += data.length;
@@ -97,7 +138,7 @@ export class SyncOrdersHandler {
 
         offset += PAGE_LIMIT;
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 5_000));
       }
 
       this.logger.log(`Successfully synced ${totalSynced} orders`);

@@ -7,6 +7,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { BasicCommandRunner } from './commands/basic.command';
 import { SyncRestaurantsCommandRunner } from './commands/sync-restaurants.command';
 import { SyncOrdersCommandRunner } from './commands/sync-orders.command';
+import { SyncDishesCommandRunner } from './commands/sync-dishes.command';
 import { ZeltyModule } from '../zelty/zelty.module';
 
 @Module({
@@ -34,6 +35,7 @@ import { ZeltyModule } from '../zelty/zelty.module';
     BasicCommandRunner,
     SyncRestaurantsCommandRunner,
     SyncOrdersCommandRunner,
+    SyncDishesCommandRunner,
 
     // Seeders
   ],
