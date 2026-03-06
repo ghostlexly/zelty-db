@@ -119,7 +119,8 @@ export class SyncOrdersHandler {
                   this.logger.error(
                     `Error syncing zeltyOrderItem: ${err.message}`,
                     {
-                      order_items: order.items,
+                      item: item,
+                      itemData: itemData,
                     },
                   );
                 });
