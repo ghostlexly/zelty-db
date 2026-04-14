@@ -7,7 +7,7 @@ services:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
 
-  caddy:
+  zelty-db-caddy:
     image: lunisoft/zelty-db:caddy
     build:
       context: ./caddy
@@ -16,8 +16,6 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-    depends_on:
-      - backend
     restart: unless-stopped
 
 volumes:
