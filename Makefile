@@ -1,7 +1,7 @@
 .PHONY: help lint lint-fix type-check qa start stop build prisma-generate prisma-migrate-generate prisma-migrate-deploy prisma-migrate-diff cli
 
 COMPOSE := docker compose
-NPM := $(COMPOSE) exec frontend npm
+NPM := $(COMPOSE) exec zelty-db-frontend npm
 POSTGRES_TEST_URL := postgresql://lunisoft:ChangeMe@postgres-test:5432/test
 
 ##———————————— Commands
@@ -37,37 +37,37 @@ qa: lint-fix type-check ## Launch quality automation (lint, type checking...)
 
 prisma-g: ## Generate Prisma Client files
 	cd backend && npx prisma generate
-	$(COMPOSE) exec backend npx prisma generate
-	$(COMPOSE) restart backend
+	$(COMPOSE) exec zelty-db-backend npx prisma generate
+	$(COMPOSE) restart zelty-db-backend
 
 prisma-m-g: ## Automatically generate new Prisma migration
-	$(COMPOSE) exec backend npx prisma migrate dev --create-only
+	$(COMPOSE) exec zelty-db-backend npx prisma migrate dev --create-only
 
 prisma-m-deploy: ## Apply the latest Prisma migrations
-	$(COMPOSE) exec backend npx prisma migrate deploy
+	$(COMPOSE) exec zelty-db-backend npx prisma migrate deploy
 	cd backend && npx prisma generate
-	$(COMPOSE) exec backend npx prisma generate
-	$(COMPOSE) restart backend
+	$(COMPOSE) exec zelty-db-backend npx prisma generate
+	$(COMPOSE) restart zelty-db-backend
 
 prisma-m-diff: ## Check if database is up to date with schema file
-	$(COMPOSE) exec backend npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script
+	$(COMPOSE) exec zelty-db-backend npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script
 
 ##———————————— Testing
 
 test: ## Run unit tests
-	$(COMPOSE) exec -e NODE_ENV=test backend npm test
+	$(COMPOSE) exec -e NODE_ENV=test zelty-db-backend npm test
 
 test-watch: ## Run tests in watch mode
-	$(COMPOSE) exec -e NODE_ENV=test backend npm run test:watch	
+	$(COMPOSE) exec -e NODE_ENV=test zelty-db-backend npm run test:watch
 
 test-e2e: ## Run tests (migrate test database and run E2E tests)
 	$(COMPOSE) exec -e NODE_ENV=test -e APP_DATABASE_CONNECTION_URL=$(POSTGRES_TEST_URL) backend npx prisma migrate reset --force
-	$(COMPOSE) exec -e NODE_ENV=test backend npm run test:e2e
+	$(COMPOSE) exec -e NODE_ENV=test zelty-db-backend npm run test:e2e
 
 ##———————————— Container Management
 
 bb: ## Run bash in the backend container
-	$(COMPOSE) exec backend bash
+	$(COMPOSE) exec zelty-db-backend bash
 
 bf: ## Run bash in the frontend container
-	$(COMPOSE) exec frontend bash
+	$(COMPOSE) exec zelty-db-frontend bash

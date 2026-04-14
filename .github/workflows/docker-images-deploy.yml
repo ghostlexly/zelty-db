@@ -121,7 +121,7 @@ jobs:
             cd ~/zelty-db
 
             # Run migrations
-            sudo docker compose exec backend npx prisma migrate deploy
+            sudo docker compose exec zelty-db-backend npx prisma migrate deploy
 
       - name: Prune untagged docker images
         uses: appleboy/ssh-action@master
