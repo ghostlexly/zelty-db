@@ -1,6 +1,6 @@
 services:
   # ===================================================================================================================================================================================
-  backend:
+  zelty-db-backend:
     image: lunisoft/zelty-db:backend
     build:
       context: ./backend
@@ -17,31 +17,19 @@ services:
     volumes:
       - ./backend/logs:/usr/src/app/logs
     depends_on:
-      - postgres
-      - redis
+      - zelty-db-postgres
+      - zelty-db-redis
     tty: true
     restart: unless-stopped
   # ===================================================================================================================================================================================
-  caddy:
-    image: lunisoft/zelty-db:caddy
-    build:
-      context: ./caddy
-    volumes:
-      - ./caddy/logs:/var/log/caddy:z
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - backend
-    restart: unless-stopped
-  # ===================================================================================================================================================================================
-  redis:
+  zelty-db-redis:
     image: redis:8.2.2
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - redis_data:/data
     restart: unless-stopped
   # ===================================================================================================================================================================================
-  postgres:
+  zelty-db-postgres:
     image: postgres:17.2
     ports:
       - "5432:5432"
@@ -56,5 +44,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  caddy_data:
-  caddy_config:

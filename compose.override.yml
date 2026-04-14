@@ -1,32 +1,24 @@
 services:
-  # ===================================================================================================================================================================================
-  backend:
+  zelty-db-backend:
     command: npm run start:dev
     environment:
       - NODE_ENV=development
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
-  # ===================================================================================================================================================================================
+
   caddy:
+    image: lunisoft/zelty-db:caddy
+    build:
+      context: ./caddy
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-  # ===================================================================================================================================================================================
-  postgres-test:
-    image: postgres:17.2
-    ports:
-      - "127.0.0.1:5433:5432"
-    environment:
-      - POSTGRES_USER=lunisoft
-      - POSTGRES_PASSWORD=ChangeMe
-      - POSTGRES_DB=test
+      - ./caddy/logs:/var/log/caddy:z
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
     restart: unless-stopped
-  # ===================================================================================================================================================================================
-  redis-commander:
-    image: ghcr.io/joeferner/redis-commander:latest
-    environment:
-      - REDIS_HOST=${APP_REDIS_HOST}
-      - REDIS_PORT=${APP_REDIS_PORT}
-      - REDIS_PASSWORD=GhostLexly.7
-    ports:
-      - "8081:8081"
+
+volumes:
+  caddy_data:
+  caddy_config:
