@@ -19,6 +19,8 @@ services:
     depends_on:
       - zelty-db-postgres
       - zelty-db-redis
+    networks:
+      - lunisoft
     tty: true
     restart: unless-stopped
   # ===================================================================================================================================================================================
@@ -27,6 +29,8 @@ services:
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - redis_data:/data
+    networks:
+      - lunisoft
     restart: unless-stopped
   # ===================================================================================================================================================================================
   zelty-db-postgres:
@@ -39,8 +43,14 @@ services:
       - POSTGRES_DB=${PROJECT_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lunisoft
     restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  lunisoft:
+    external: true

@@ -6,6 +6,8 @@ services:
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
+    networks:
+      - lunisoft
 
   zelty-db-caddy:
     image: lunisoft/zelty-db:caddy
@@ -16,7 +18,8 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-    restart: unless-stopped
+    networks:
+      - lunisoft
 
 volumes:
   caddy_data:
